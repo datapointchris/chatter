@@ -3,7 +3,7 @@ class Chatter < Formula
   homepage ""
   url "file:///Users/chris/code/chatter/chatter-1.0.0.tar.gz"
   version "1.0.0"
-  sha256 "7db7af880f8d938d6f77b7c5501c1becf492d627a4b308c7f675e5780255e8a8"
+  sha256 "4c4885338eeb8bad5ec5fe1070851bba1cbf0481df09089390c6b18cf4343595"
 
   def install
     (bin/"chatter").write <<~EOS

@@ -6,10 +6,13 @@ import streamlit as st
 from dotenv import load_dotenv
 from openai import OpenAI
 
+st.set_page_config(page_title='Chatter', page_icon='🤖')
+
 load_dotenv()
 
 USER_AVATAR = '👤'
 BOT_AVATAR = '🤖'
+OPENAI_MODEL = 'gpt-4o'
 DOCUMENT_STORAGE = Path.home() / 'Documents' / 'chatter'
 DB_NAME = 'chat_history.json'
 DB_LOCATION = DOCUMENT_STORAGE / DB_NAME
@@ -18,7 +21,7 @@ client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
 # Ensure openai_model is initialized in session state
 if 'openai_model' not in st.session_state:
-    st.session_state['openai_model'] = 'gpt-4o'
+    st.session_state['openai_model'] = OPENAI_MODEL
 
 
 # Load chat history from JSON file
@@ -31,7 +34,7 @@ def load_chat_sessions():
 
 # Save chat history to JSON file
 def save_chat_sessions(chat_sessions):
-    with DB_LOCATION.open('') as file:
+    with DB_LOCATION.open('w') as file:
         json.dump(chat_sessions, file)
 
 
