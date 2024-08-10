@@ -24,6 +24,20 @@ bandit = "^1.7.9"
 mypy = "^1.11.1"
 isort = "^5.13.2"
 
+[tool.black]
+line-length = 120
+skip-string-normalization = true
+exclude = '''
+(
+/alembic
+| .git
+| .mypy_cache
+| .venv
+| build
+| dist
+)
+'''
+
 [tool.mypy]
 pretty = true
 ignore_missing_imports = true

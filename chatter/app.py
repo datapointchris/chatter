@@ -19,12 +19,7 @@ DB_LOCATION = DOCUMENT_STORAGE / DB_NAME
 CUSTOM_STYLESHEET = 'styles.css'
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
-# Ensure openai_model is initialized in session state
-if 'openai_model' not in st.session_state:
-    st.session_state['openai_model'] = OPENAI_MODEL
 
-
-# Load chat history from JSON file
 def load_chat_sessions():
     if DB_LOCATION.exists():
         with DB_LOCATION.open() as file:
@@ -32,13 +27,15 @@ def load_chat_sessions():
     return []
 
 
-# Save chat history to JSON file
 def save_chat_sessions(chat_sessions):
     with DB_LOCATION.open('w') as file:
         json.dump(chat_sessions, file)
 
 
-# Load chat sessions on app start
+if 'openai_model' not in st.session_state:
+    st.session_state['openai_model'] = OPENAI_MODEL
+
+
 if 'chat_sessions' not in st.session_state:
     st.session_state.chat_sessions = load_chat_sessions()
     st.session_state.current_session = None
@@ -47,7 +44,6 @@ if 'chat_sessions' not in st.session_state:
 with open(CUSTOM_STYLESHEET) as f:
     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
-# Sidebar with chat sessions and a button to create a new session
 with st.sidebar:
     st.write("<h1 class='sidebar-title'>Chat Sessions</h1>", unsafe_allow_html=True)
     for i, session in enumerate(st.session_state.chat_sessions):
@@ -60,11 +56,11 @@ with st.sidebar:
         st.session_state.chat_sessions.append(new_session)
         st.session_state.current_session = len(st.session_state.chat_sessions) - 1
 
-# Ensure a session is selected
-if st.session_state.current_session is None and st.session_state.chat_sessions:
-    st.session_state.current_session = 0
 
-# Display chat messages for the current session
+if st.session_state.current_session is None and st.session_state.chat_sessions:
+    st.session_state.current_session = len(st.session_state.chat_sessions) - 1
+
+
 if st.session_state.current_session is not None:
     current_session = st.session_state.chat_sessions[st.session_state.current_session]
     for message in current_session['messages']:
@@ -72,11 +68,10 @@ if st.session_state.current_session is not None:
         with st.chat_message(message['role'], avatar=avatar):
             st.markdown(message['content'])
 
-    # Main chat interface
     if prompt := st.chat_input('How can I help?'):
         current_session['messages'].append({'role': 'user', 'content': prompt})
 
-        # Set session name if it's the first question
+        # set session name automatically after first question
         if not current_session['name']:
             summary_response = client.chat.completions.create(
                 model=st.session_state['openai_model'],
@@ -106,9 +101,7 @@ if st.session_state.current_session is not None:
                 full_response += response.choices[0].delta.content or ''
                 message_placeholder.markdown(full_response + '|')
             message_placeholder.markdown(full_response)
-        current_session['messages'].append(
-            {'role': 'assistant', 'content': full_response}
-        )
+        current_session['messages'].append({'role': 'assistant', 'content': full_response})
 
     # Save chat sessions after each interaction
     save_chat_sessions(st.session_state.chat_sessions)
